@@ -105,3 +105,28 @@ def matInverse(M):
                     result[k][j] -= factor * result[i][j]
     
     return result
+
+def hslToRgb(h, s, l):
+    # Asegurarse de que los valores estén en el rango correcto
+    h = max(0, min(1, h))
+    s = max(0, min(1, s))
+    l = max(0, min(1, l))
+    
+    if s == 0:
+        r, g, b = l, l, l
+    else:
+        def hue2rgb(p, q, t):
+            if t < 0: t += 1
+            if t > 1: t -= 1
+            if t < 1/6: return p + (q - p) * 6 * t
+            if t < 1/2: return q
+            if t < 2/3: return p + (q - p) * (2/3 - t) * 6
+            return p
+
+        q = l * (1 + s) if l < 0.5 else l + s - l * s
+        p = 2 * l - q
+        r = hue2rgb(p, q, h + 1/3)
+        g = hue2rgb(p, q, h)
+        b = hue2rgb(p, q, h - 1/3)
+
+    return int(r * 255), int(g * 255), int(b * 255)

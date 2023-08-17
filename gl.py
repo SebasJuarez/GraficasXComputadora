@@ -1,9 +1,12 @@
 import struct
+import time
 import mathLibrary as ml
 from math import pi, sin, cos, tan
 from obj import Obj
 from texture import Texture
 from mathLibrary import barycentricCoords
+
+
 
 POINTS = 0
 LINES = 1
@@ -104,11 +107,10 @@ class Renderer(object):
             self.pixels[x][y] = clr or self.currColor
 
 
-    def glTriangle(self, A, B, C, vtA, vtB, vtC):
+    def glTriangle(self, A, B, C, vtA, vtB, vtC, time=0.0):
         # Rederización de un triángulo usando coordenadas baricéntricas.
         # Se reciben los vertices A, B y C y las coordenadas de
-        # textura vtA, vtB y vtC
-
+        # textura vtA, vtB y vt
         # Bounding box
         minX = round(min(A[0], B[0], C[0]))
         maxX = round(max(A[0], B[0], C[0]))
@@ -144,23 +146,30 @@ class Renderer(object):
 
                             # Si contamos un Fragment Shader, obtener el color de ahí.
                             # Sino, usar el color preestablecido.
-                            if self.fragmentShader != None:
-                                # Mandar los parámetros necesarios al shader
-                                colorP = self.fragmentShader(texCoords = uvs,
-                                                             texture = self.activeTexture)
-
+                            if hasattr(self, 'fragmentShader') and self.fragmentShader is not None:
+                                colorP = self.fragmentShader(texCoords=uvs, texture=self.activeTexture)
                                 self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
-                                
+
+                            if hasattr(self, 'staticShader') and self.staticShader is not None:
+                                colorP = self.staticShader(texCoords=uvs, texture=self.activeTexture)
+                                self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
+
+                            #if hasattr(self, 'invertColorShader') and self.invertColorShader is not None:
+                                #colorP = self.invertColorShader(texCoords=uvs, texture=self.activeTexture)
+                                #self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
+
+                            # if hasattr(self, 'waterFragmentShader') and self.waterFragmentShader is not None:
+                            #     colorP = self.waterFragmentShader(texCoords=uvs, texture=self.activeTexture, time=time)
+                            #     self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
+
+                            #if hasattr(self, 'NebulaShader') and self.NebulaShader is not None:
+                             #   colorP = self.NebulaShader(texCoords=uvs, texture=self.activeTexture)
+                              #  self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
                             else:
-                                self.glPoint(x, y)
-                            
-                            if self.staticShader != None:
-                                # Mandar los parámetros necesarios al shader
-                                colorP = self.staticShader(texCoords = uvs,
-                                                             texture = self.activeTexture)
+                                colorP = None
 
+                            if colorP is not None:
                                 self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
-                                
                             else:
                                 self.glPoint(x, y)
 
@@ -355,10 +364,9 @@ class Renderer(object):
     def glRender(self):
         
         # Esta función está encargada de renderizar todo a la tabla de pixeles
-
+        current_time = time.time()
         transformedVerts = []
         texCoords = []
-
         # Para cada modelo en nuestro listado de objetos
         for model in self.objects:
 
@@ -437,7 +445,8 @@ class Renderer(object):
         for prim in primitives:
             if self.primitiveType ==  TRIANGLES:
                 self.glTriangle(prim[0], prim[1], prim[2],
-                                prim[3], prim[4], prim[5])
+                                prim[3], prim[4], prim[5],
+                                time = current_time)
         
 
 

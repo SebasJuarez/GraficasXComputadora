@@ -2,6 +2,16 @@ import math
 import random
 import mathLibrary as ml
 
+def waterEffect(time, position):
+    frequency = 1.0  # Ajusta la frecuencia de las ondas
+    amplitude = 0.1  # Ajusta la amplitud de las ondas
+    
+    wave_x = position[0] + time * frequency
+    wave_y = position[1] + time * frequency
+    
+    displacement = amplitude * (math.sin(wave_x) + math.cos(wave_y))
+    
+    return displacement
 
 def vertexShader(vertex, **kwargs):
     modelMatrix = kwargs["modelMatrix"]
@@ -77,23 +87,42 @@ def NebulaShader(**kwargs):
 
 def waterFragmentShader(**kwargs):
     texCoords = kwargs["texCoords"]
-    time = kwargs["time"]
+    texture = kwargs["texture"]
+    time = kwargs["time"]  # Nuevo parámetro para el tiempo
+    
+    if texture != None:
+        color = texture.getColor(texCoords[0], texCoords[1])
+    else:
+        color = (1, 1, 1)
+    
+    # Aplica el efecto de ondas en el agua
+    displacement = waterEffect(time, texCoords)
+    texCoords = [texCoords[0], texCoords[1] + displacement]
+    
+    # Aplica el efecto de distorsión para simular el agua
+    distortion_intensity = 0.05  # Ajusta este valor para controlar la intensidad de la distorsión
+    noise = random.uniform(-distortion_intensity, distortion_intensity)
+    texCoords = [texCoords[0] + noise, texCoords[1] + noise]
+    
+    # Obtén el color de la textura después de aplicar la distorsión
+    color = texture.getColor(texCoords[0], texCoords[1])
+    
+    return color
 
-    # Escala el tamaño de las ondas
-    uv = [texCoords[0] * 10.0, texCoords[1] * 10.0]
+def invertColorShader(**kwargs):
+    texCoords = kwargs["texCoords"]
+    texture = kwargs["texture"]
 
-    # Calcula una perturbación basada en el tiempo
-    offset = math.sin(uv[0] + uv[1] + time) * 0.1
-
-    # Combina el color base con una variación basada en la perturbación
-    baseColor = [0.0, 0.4, 0.8]
-    waveColor = [0.0, 0.2, 0.6]
-
-    # Combina el color base con la variación
-    finalColor = [
-        baseColor[0] + (waveColor[0] - baseColor[0]) * offset,
-        baseColor[1] + (waveColor[1] - baseColor[1]) * offset,
-        baseColor[2] + (waveColor[2] - baseColor[2]) * offset
-    ]
-
-    return finalColor
+    if texture != None:
+        color = texture.getColor(texCoords[0], texCoords[1])
+    else:
+        color = (1, 1, 1)
+    
+    # Invierte los canales de color
+    inverted_color = (
+        1.0 - color[0],
+        1.0 - color[1],
+        1.0 - color[2]
+    )
+    
+    return inverted_color

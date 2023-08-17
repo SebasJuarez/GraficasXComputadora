@@ -9,7 +9,7 @@ height = 720
 
 modelFile = "models/model.obj"
 textureFile = "textures/model.bmp"
-exitFile = "photoshoots/mediumShot.bmp"
+exitFile = "photoshoots/Shader4.bmp"
 
 rend = Renderer(width, height)
 
@@ -17,6 +17,8 @@ rend.vertexShader = shaders.vertexShader
 #rend.fragmentShader = shaders.fragmentShader
 #rend.staticShader = shaders.staticShader
 #rend.NebulaShader = shaders.NebulaShader
+rend.waterFragmentShader = shaders.waterFragmentShader
+#rend.invertColorShader = shaders.invertColorShader
 
 # ~~~~~ Medium Shot ~~~~~
 rend.glLookAt(camPos = (0,0,-1), eyePos= (0,0,-5))
