@@ -15,7 +15,8 @@ rend = Renderer(width, height)
 
 rend.vertexShader = shaders.vertexShader
 #rend.fragmentShader = shaders.fragmentShader
-rend.staticShader = shaders.staticShader
+#rend.staticShader = shaders.staticShader
+#rend.NebulaShader = shaders.NebulaShader
 
 # ~~~~~ Medium Shot ~~~~~
 rend.glLookAt(camPos = (0,0,-1), eyePos= (0,0,-5))

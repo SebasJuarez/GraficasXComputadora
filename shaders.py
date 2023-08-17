@@ -1,12 +1,4 @@
-'''
- * Nombre: shaders.py
- * Programadora: Fernanda Esquivel (esq21542@uvg.edu.gt)
- * Lenguaje: Python
- * Recursos: VSCode
- * Historial: Finalizado el 16.07.2023 
-              Modificado el 08.08.2023
- '''
-
+import math
 import random
 import mathLibrary as ml
 
@@ -67,3 +59,41 @@ def staticShader(**kwargs):
     )
     
     return static_color
+
+def NebulaShader(**kwargs):
+    texCoords = kwargs["texCoords"]
+
+    # Calcula la distancia desde el centro de la nebulosa
+    distance = math.sqrt((texCoords[0] - 0.5) ** 2 + (texCoords[1] - 0.5) ** 2)
+    
+    # Ajusta los parámetros para controlar la apariencia de la nebulosa
+    brightness = 1.0 - distance * 2  # Cambia el brillo en función de la distancia al centro
+    hue = (texCoords[0] + texCoords[1]) * 0.5  # Cambia el tono en función de las coordenadas
+
+    # Convierte el color de HSL a RGB
+    rgb_color = ml.hslToRgb(hue, 1.0, brightness)
+
+    return rgb_color
+
+def waterFragmentShader(**kwargs):
+    texCoords = kwargs["texCoords"]
+    time = kwargs["time"]
+
+    # Escala el tamaño de las ondas
+    uv = [texCoords[0] * 10.0, texCoords[1] * 10.0]
+
+    # Calcula una perturbación basada en el tiempo
+    offset = math.sin(uv[0] + uv[1] + time) * 0.1
+
+    # Combina el color base con una variación basada en la perturbación
+    baseColor = [0.0, 0.4, 0.8]
+    waveColor = [0.0, 0.2, 0.6]
+
+    # Combina el color base con la variación
+    finalColor = [
+        baseColor[0] + (waveColor[0] - baseColor[0]) * offset,
+        baseColor[1] + (waveColor[1] - baseColor[1]) * offset,
+        baseColor[2] + (waveColor[2] - baseColor[2]) * offset
+    ]
+
+    return finalColor
