@@ -7,17 +7,17 @@ print("Esepera un segundo\n\n")
 width = 1080
 height = 720
 
-modelFile = "models/model.obj"
-textureFile = "textures/model.bmp"
+modelFile = "models/coffee_cup_obj.obj"
+textureFile = "textures/Base_color.bmp"
 exitFile = "photoshoots/Shader4.bmp"
 
 rend = Renderer(width, height)
 
 rend.vertexShader = shaders.vertexShader
 #rend.fragmentShader = shaders.fragmentShader
-#rend.staticShader = shaders.staticShader
+rend.staticShader = shaders.staticShader
 #rend.NebulaShader = shaders.NebulaShader
-rend.waterFragmentShader = shaders.waterFragmentShader
+#rend.waterFragmentShader = shaders.waterFragmentShader
 #rend.invertColorShader = shaders.invertColorShader
 
 # ~~~~~ Medium Shot ~~~~~

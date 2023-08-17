@@ -154,17 +154,17 @@ class Renderer(object):
                                 colorP = self.staticShader(texCoords=uvs, texture=self.activeTexture)
                                 self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
 
-                            #if hasattr(self, 'invertColorShader') and self.invertColorShader is not None:
-                                #colorP = self.invertColorShader(texCoords=uvs, texture=self.activeTexture)
-                                #self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
+                            # if hasattr(self, 'invertColorShader') and self.invertColorShader is not None:
+                            #     colorP = self.invertColorShader(texCoords=uvs, texture=self.activeTexture)
+                            #     self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
 
                             # if hasattr(self, 'waterFragmentShader') and self.waterFragmentShader is not None:
                             #     colorP = self.waterFragmentShader(texCoords=uvs, texture=self.activeTexture, time=time)
                             #     self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
 
-                            #if hasattr(self, 'NebulaShader') and self.NebulaShader is not None:
-                             #   colorP = self.NebulaShader(texCoords=uvs, texture=self.activeTexture)
-                              #  self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
+                            # if hasattr(self, 'NebulaShader') and self.NebulaShader is not None:
+                            #    colorP = self.NebulaShader(texCoords=uvs, texture=self.activeTexture)
+                            #    self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
                             else:
                                 colorP = None
 
