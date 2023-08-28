@@ -50,9 +50,9 @@ def barycentricCoords(A, B, C, P):
     w = areaABP / areaABC
 
     if 0<=u<=1 and 0<=v<=1 and 0<=w<=1 and isclose(u+v+w, 1.0):
-        return (u, v, w)
+        return u, v, w
     else:
-        return None
+        return -1,-1,-1
 
 def twoVecSubstraction(V1, V2):
     result = (V1[0] - V2[0], V1[1] - V2[1], V1[2] - V2[2])

@@ -27,6 +27,11 @@ class Texture(object):
                 self.pixels.append(pixelRow)
 
     def getColor(self, u, v):
+        if isinstance(u, list) or isinstance(v, list):
+            # Si u o v son listas, tomar el primer elemento como valor individual
+            u = u[0]
+            v = v[0]
+        
         if 0 <= u < 1 and 0 <= v < 1:
             return self.pixels[int(v * self.height)][int(u * self.width)]
         else:
