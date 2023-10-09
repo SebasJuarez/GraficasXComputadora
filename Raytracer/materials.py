@@ -17,6 +17,27 @@ class Material:
         self.type = type
         self.texture = texture
 
+def Velvet():
+    return Material(diffuse=(0.9, 0.6, 0.7), spec=64, Ks=0.15, type=OPAQUE, texture=pygame.image.load("imagenes/Velvet.jpg"))
+
+def Marmol():
+    return Material(diffuse=(1.0, 1.0, 1.0), spec=32, Ks=0.3, type=OPAQUE, texture=pygame.image.load("imagenes/Marmol.jpg"))
+
+def Sky():
+    return Material(diffuse=(0.7, 0.9, 0.9), spec=64, Ks=0.15, type=OPAQUE, texture=pygame.image.load("imagenes/Sky.jpg"))
+
+def greenMirror():
+    return Material(diffuse=(0, 1, 0), spec=32, Ks=0.15, type=REFLECTIVE)
+
+def ceiling():
+    return Material(diffuse=(0.85, 0.85, 0.85), spec=64, Ks=0.15, type=REFLECTIVE) #Gris Claro
+
+def wall():
+    return Material(diffuse=(0.2, 0.2, 0.2))  # Gris oscuro
+
+def floor():
+    return Material(diffuse=(0.7, 0.7, 0.7)) # Gris
+
 def glass():
     return Material(diffuse=(0.8, 0.8, 0.8), spec=64, Ks=0.15, ior=1.5, type=TRANSPARENT)
 

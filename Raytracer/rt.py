@@ -1,10 +1,9 @@
 '''
-Autor: Sebastian Juarez 21471
+
+ Autor: Sebastian Juarez 21471
 
 '''
-
 from math import tan, pi, atan2, acos
-import numpy as numeritos
 import pygame
 from materials import *
 from lights import *
@@ -118,16 +117,16 @@ class Raytracer(object):
 
         if intercept.obj.material.type == OPAQUE:
             for light in self.lights:
-                if light.type == "Ambient":
+                if light.type == "AMBIENT":
                     color = light.getColor()
                     ambientLightColor = [ambientLightColor[i] + color[i] for i in range(3)]
                 else:
                     shadowDirection = None
-                    if light.type == "Directional":
+                    if light.type == "DIRECTIONAL":
                         shadowDirection = [i * -1 for i in light.direction]
-                    if light.type == "Point":
-                        lightDirection = numeritos.subtract(light.position, intercept.point)
-                        shadowDirection = lightDirection / numeritos.linalg.norm(lightDirection)
+                    if light.type == "POINT":
+                        lightDirection = numeritos.twoVecSubstraction(light.position, intercept.point)
+                        shadowDirection = numeritos.vecNorm(lightDirection)
 
                     shadowIntersect = self.rtCastRay(intercept.point, shadowDirection, intercept.obj)
 
@@ -138,18 +137,22 @@ class Raytracer(object):
                         specColor = light.getSpecularColor(intercept, self.cameraPosition)
                         specularLightColor = [specularLightColor[i] + specColor[i] for i in range(3)]
         elif intercept.obj.material.type == REFLECTIVE:
-            reflectRay = reflect(intercept.normal, numeritos.array(rayDirection) * -1)
+
+            factor = -1
+            negativeRayDirection = [elemento * factor for elemento in rayDirection]
+
+            reflectRay = reflect(intercept.normal, negativeRayDirection)
             reflectIntercept = self.rtCastRay(intercept.point, reflectRay, intercept.obj, recursionDepth + 1)
             reflectColor = self.rtRayColor(reflectIntercept, reflectRay, recursionDepth + 1)
 
             for light in self.lights:
-                if light.type != "Ambient":
+                if light.type != "AMBIENT":
                     shadowDirection = None
-                    if light.type == "Directional":
+                    if light.type == "DIRECTIONAL":
                         shadowDirection = [i * -1 for i in light.direction]
-                    if light.type == "Point":
-                        lightDirection = numeritos.subtract(light.position, intercept.point)
-                        shadowDirection = lightDirection / numeritos.linalg.norm(lightDirection)
+                    if light.type == "POINT":
+                        lightDirection = numeritos.twoVecSubstraction(light.position, intercept.point)
+                        shadowDirection = numeritos.vecNorm(lightDirection)
 
                     shadowIntersect = self.rtCastRay(intercept.point, shadowDirection, intercept.obj)
 
@@ -157,22 +160,25 @@ class Raytracer(object):
                         specColor = light.getSpecularColor(intercept, self.cameraPosition)
                         specularLightColor = [specularLightColor[i] + specColor[i] for i in range(3)]
         elif intercept.obj.material.type == TRANSPARENT:
-            isOutside = numeritos.dot(rayDirection, intercept.normal) < 0
-            bias = intercept.normal * 0.001
-
-            reflectRay = reflect(intercept.normal, numeritos.array(rayDirection) * -1)
-            reflectOrigin = numeritos.add(intercept.point, bias) if isOutside else numeritos.subtract(intercept.point, bias)
+            isOutside = numeritos.dot_product(rayDirection, intercept.normal) < 0
+            factor = 0.001
+            bias = [elemento * factor for elemento in intercept.normal]
+            
+            factor = -1
+            negativeRayDirection = [elemento * factor for elemento in rayDirection]
+            reflectRay = reflect(intercept.normal, negativeRayDirection)
+            reflectOrigin = numeritos.twoVecSum(intercept.point, bias) if isOutside else numeritos.twoVecSubstraction(intercept.point, bias)
             reflectIntercept = self.rtCastRay(reflectOrigin, reflectRay, None, recursionDepth + 1)
             reflectColor = self.rtRayColor(reflectIntercept, reflectRay, recursionDepth + 1)
 
             for light in self.lights:
-                if light.type != "Ambient":
+                if light.type != "AMBIENT":
                     shadowDirection = None
-                    if light.type == "Directional":
+                    if light.type == "DIRECTIONAL":
                         shadowDirection = [i * -1 for i in light.direction]
-                    if light.type == "Point":
-                        lightDirection = numeritos.subtract(light.position, intercept.point)
-                        shadowDirection = lightDirection / numeritos.linalg.norm(lightDirection)
+                    if light.type == "POINT":
+                        lightDirection = numeritos.twoVecSubstraction(light.position, intercept.point)
+                        shadowDirection = numeritos.vecNorm(lightDirection)
 
                     shadowIntersect = self.rtCastRay(intercept.point, shadowDirection, intercept.obj)
 
@@ -181,14 +187,14 @@ class Raytracer(object):
                         specularLightColor = [specularLightColor[i] + specColor[i] for i in range(3)]
 
             if not totalInternalReflection(intercept.normal, rayDirection, 1.0, intercept.obj.material.ior):
-                refractRay = refract(intercept.normal, numeritos.array(rayDirection), 1.0, intercept.obj.material.ior)
-                refractOrigin = numeritos.subtract(intercept.point, bias) if isOutside else numeritos.add(intercept.point, bias)
+                refractRay = refract(intercept.normal, rayDirection, 1.0, intercept.obj.material.ior)
+                refractOrigin = numeritos.twoVecSubstraction(intercept.point, bias) if isOutside else numeritos.twoVecSum(intercept.point, bias)
                 refractIntercept = self.rtCastRay(refractOrigin, refractRay, None, recursionDepth + 1)
                 refractColor = self.rtRayColor(refractIntercept, refractRay, recursionDepth + 1)
 
                 kr, kt = fresnel(intercept.normal, rayDirection, 1.0, intercept.obj.material.ior)
-                reflectColor = numeritos.multiply(reflectColor, kr)
-                refractColor = numeritos.multiply(refractColor, kt)
+                reflectColor = numeritos.valVecMultiply(kr, reflectColor)
+                refractColor = numeritos.valVecMultiply(kt, refractColor)
 
         lightColor = [ambientLightColor[i] + diffuseLightColor[i] +
                       specularLightColor[i] + reflectColor[i] + refractColor[i]
@@ -208,7 +214,7 @@ class Raytracer(object):
                     pY *= self.topEdge
 
                     direction = (pX, pY, -self.nearPlane)
-                    direction = direction / numeritos.linalg.norm(direction)
+                    direction = numeritos.vecNorm(direction)
 
                     intercept = self.rtCastRay(self.cameraPosition, direction)
                     finalColor = self.rtRayColor(intercept, direction)

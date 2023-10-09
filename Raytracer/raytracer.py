@@ -6,13 +6,13 @@ Autor: Sebastian Juarez 21471
 import pygame
 from pygame.locals import *
 
-from rt import Raytracer
+from rt import *
 from figures import *
 from lights import *
 from materials import *
 
-width = 300
-height = 300
+width = 480
+height = 480
 
 pygame.init()
 
@@ -20,46 +20,44 @@ screen = pygame.display.set_mode((width, height), pygame.DOUBLEBUF | pygame.HWAC
 screen.set_alpha(None)
 
 rayTracer = Raytracer(screen)
-rayTracer.environmentMap = pygame.image.load("imagenes/fondo.jpg")
-rayTracer.rtClearColor(0.25, 0.25, 0.25)
+rayTracer.rtClearColor(0.2, 0.2, 0.2)
 rayTracer.rtColor(1, 1, 1)
 
+rayTracer.scene.append(
+    Plane(position=(0, -2, 0), normal=(0, 1, -0.2), material=floor())
+)
+rayTracer.scene.append(
+    Plane(position=(0, 5, 0), normal=(0, 1, 0.2), material=ceiling())
+)
+rayTracer.scene.append(
+    Plane(position=(4, 0, 0), normal=(1, 0, 0.2), material=wall())
+)
+rayTracer.scene.append(
+    Plane(position=(-4, 0, 0), normal=(1, 0, -0.2), material=wall())
+)
+rayTracer.scene.append(
+    Plane(position=(0, 0, 5), normal=(0, 0, 1), material=wall())
+)
 
 rayTracer.scene.append(
-    Sphere(position=(0, 1.5, -5), radius=0.5, material=cell())
-)
-rayTracer.scene.append(
-    Sphere(position=(0, -1.5, -5), radius=0.5, material=mirror())
+    Disk(position=(0, 0, -7), normal=(0, 0, 1), radius=1, material=mirror())
 )
 
 rayTracer.scene.append(
-    Sphere(position=(1.7, 1.5, -5), radius=0.5, material=glass())
+    AABB(position=(-1, 1, -5), size=(1, 1, 1), material=Velvet())
 )
 rayTracer.scene.append(
-    Sphere(position=(1.7, -1.5, -5), radius=0.5, material=diamond())
+    AABB(position=(-1, -1, -5), size=(1, 1, 1), material=Marmol())
+)
+rayTracer.scene.append(
+    AABB(position=(1, 1, -5), size=(1, 1, 1), material=Marmol())
+)
+rayTracer.scene.append(
+    AABB(position=(1, -1, -5), size=(1, 1, 1), material=Sky())
 )
 
 rayTracer.lights.append(
-    AmbientLight(intensity=1)
-)
-rayTracer.lights.append(
-    DirectionalLight(direction=(-1, -1, -1), intensity=0.5)
-)
-rayTracer.lights.append(
-    PointLight(position=(0, 0, -4.5), intensity=1, color=(1, 0, 1))
-)
-
-rayTracer.lights.clear()
-rayTracer.lights.append(
-    AmbientLight(intensity=0.5)
-)
-
-rayTracer.scene.append(
-    Sphere(position=(-1.7, 1.5, -5), radius=0.5, material=beach())
-)
-
-rayTracer.scene.append(
-    Sphere(position=(-1.7, -1.5, -5), radius=0.5, material=room())
+    AmbientLight(intensity=0.7)
 )
 
 rayTracer.rtClear()
