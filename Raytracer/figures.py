@@ -31,8 +31,8 @@ class Sphere(Shape):
         self.radius = radius
 
     def intersect(self, origin, direction):
-        L = numeritos.twoVecSubstraction(self.position, origin)
-        lengthL = numeritos.vecNormSimple(L)
+        L = numeritos.numeritos.twoVecSubstraction(self.position, origin)
+        lengthL = numeritos.numeritos.vecNormSimple(L)
         tca = numeritos.dot_product(L, direction)
         d = (lengthL ** 2 - tca ** 2) ** 0.5
 
@@ -50,7 +50,7 @@ class Sphere(Shape):
             return None
         
         point = numeritos.twoVecSum(origin, numeritos.valVecMultiply(t0, direction))
-        normal = numeritos.twoVecSubstraction(point, self.position)
+        normal = numeritos.numeritos.twoVecSubstraction(point, self.position)
         normal = numeritos.vecNorm(normal)
         
         u = 0.5 + (atan2(normal[2], normal[0]) / (2 * pi))
@@ -73,7 +73,7 @@ class Plane(Shape):
         if abs(denominator) <= 0.0001:
             return None
 
-        t = numeritos.dot_product(numeritos.twoVecSubstraction(self.position, origin), self.normal) / denominator
+        t = numeritos.dot_product(numeritos.numeritos.twoVecSubstraction(self.position, origin), self.normal) / denominator
 
         if t < 0:
             return None
@@ -97,7 +97,7 @@ class Disk(Plane):
         if intercept is None:
             return None
 
-        if numeritos.vecNormSimple(numeritos.twoVecSubstraction(intercept.point, self.position)) > self.radius:
+        if numeritos.numeritos.vecNormSimple(numeritos.numeritos.twoVecSubstraction(intercept.point, self.position)) > self.radius:
             return None
 
         return Intercept(
@@ -194,3 +194,122 @@ class AABB(Shape):
             obj=self,
             textureCoordinates=(u, v)
         )
+
+class Triangle(Shape):
+    def __init__(self, vertices, material):
+        centroid = numeritos.vecMean(vertices)
+        super().__init__(centroid, material)
+        self.vertices = vertices
+
+    def intersect(self, origin, direction):
+        edge1 = numeritos.twoVecSubstraction(self.vertices[1], self.vertices[0])
+        edge2 = numeritos.twoVecSubstraction(self.vertices[2], self.vertices[0])
+        normal = numeritos.twoVecCross(edge1, edge2)
+        normal = numeritos.vecNorm(normal)
+
+        denominator = numeritos.twoVecDot(normal, direction)
+
+        if abs(denominator) <= 0.0001:
+            return None
+
+        t = (numeritos.twoVecDot(normal, self.vertices[0]) - numeritos.twoVecDot(normal, origin)) / denominator
+
+        if t < 0:
+            return None
+
+        point = numeritos.twoVecSum(origin, numeritos.valVecMultiply(t, direction))
+
+        edge0 = numeritos.twoVecSubstraction(self.vertices[0], self.vertices[2])
+        edge1 = numeritos.twoVecSubstraction(self.vertices[1], self.vertices[0])
+        edge2 = numeritos.twoVecSubstraction(self.vertices[2], self.vertices[1])
+
+        normal0 = numeritos.twoVecCross(edge0, numeritos.twoVecSubstraction(point, self.vertices[2]))
+        normal1 = numeritos.twoVecCross(edge1, numeritos.twoVecSubstraction(point, self.vertices[0]))
+        normal2 = numeritos.twoVecCross(edge2, numeritos.twoVecSubstraction(point, self.vertices[1]))
+
+        if (numeritos.twoVecDot(normal, normal0) >= 0 and
+                numeritos.twoVecDot(normal, normal1) >= 0 and
+                numeritos.twoVecDot(normal, normal2) >= 0):
+            u = numeritos.twoVecDot(edge1, numeritos.twoVecSubstraction(point, self.vertices[0]))
+            v = numeritos.twoVecDot(edge0, numeritos.twoVecSubstraction(point, self.vertices[2]))
+            w = numeritos.twoVecDot(edge2, numeritos.twoVecSubstraction(point, self.vertices[1]))
+            det = u + v + w
+
+            u = u / det
+            v = w / det
+
+            u *= 1
+            v *= 1
+
+            return Intercept(
+                distance=t,
+                point=point,
+                normal=normal,
+                obj=self,
+                textureCoordinates=(u, v)
+            )
+
+        return None
+
+    def normal(self, point):
+        edge1 = numeritos.twoVecSubstraction(self.vertices[1], self.vertices[0])
+        edge2 = numeritos.twoVecSubstraction(self.vertices[2], self.vertices[0])
+        normal = numeritos.twoVecCross(edge1, edge2)
+        normal = numeritos.vecNorm(normal)
+        return normal
+
+class Pyramid(Shape):
+    def __init__(self, position, size, material):
+        super().__init__(position, material)
+        self.size = size
+        
+        width = size[0]
+        height = size[1]
+        depth = size[2]
+
+        half_width = width / 2
+        half_height = height / 2
+        half_depth = depth / 2
+
+        vertices = [
+            numeritos.twoVecSum(position, (half_width, -half_height, half_depth)),
+            numeritos.twoVecSum(position, (-half_width, -half_height, half_depth)),
+            numeritos.twoVecSum(position, (-half_width, -half_height, -half_depth)),
+            numeritos.twoVecSum(position, (half_width, -half_height, -half_depth)),
+            numeritos.twoVecSum(position, (0, half_height, 0))
+        ]
+
+        self.triangles = [
+            Triangle((vertices[0], vertices[1], vertices[4]), material),
+            Triangle((vertices[1], vertices[2], vertices[4]), material),
+            Triangle((vertices[2], vertices[3], vertices[4]), material),
+            Triangle((vertices[3], vertices[0], vertices[4]), material),
+            Triangle((vertices[0], vertices[1], vertices[2]), material)
+        ]
+
+    def intersect(self, origin, direction):
+        intersect = None
+        t = float('inf')
+
+        for triangle in self.triangles:
+            triangle_intersect = triangle.intersect(origin, direction)
+            if triangle_intersect and triangle_intersect.distance < t:
+                t = triangle_intersect.distance
+                intersect = triangle_intersect
+
+        if intersect:
+            return Intercept(
+                distance=intersect.distance,
+                point=intersect.point,
+                normal=intersect.normal,
+                obj=self,
+                textureCoordinates=intersect.textureCoordinates
+            )
+        else:
+            return None
+
+    def normal(self, point):
+        normal_sum = (0.0, 0.0, 0.0)
+        for triangle in self.triangles:
+            normal_sum += triangle.normal(point)
+        return normal_sum / len(self.triangles)

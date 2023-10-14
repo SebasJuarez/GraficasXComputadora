@@ -130,3 +130,21 @@ def twoVecMultiply(V1, V2): #Replace for: np.multiply(V1, V2)
 def valVecMultiply(val, V): #Replace for: np.multiply(val, V2)
     result = [x * val for x in V]
     return result
+
+def calculateMean(V):
+    if not V:
+        return None  # Devolver None si el arreglo está vacío
+
+    nRows = len(V)
+    nColumns = len(V[0])
+
+    meanColumns = [0] * nColumns
+
+    for row in V:
+        for i in range(nColumns):
+            meanColumns[i] += row[i]
+
+    for i in range(nColumns):
+        meanColumns[i] /= nRows
+
+    return meanColumns

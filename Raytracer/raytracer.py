@@ -4,15 +4,14 @@ Autor: Sebastian Juarez 21471
 '''
 
 import pygame
-from pygame.locals import *
 
-from rt import *
 from figures import *
 from lights import *
+from rt import *
 from materials import *
 
-width = 480
-height = 480
+width = 500
+height = 500
 
 pygame.init()
 
@@ -20,40 +19,28 @@ screen = pygame.display.set_mode((width, height), pygame.DOUBLEBUF | pygame.HWAC
 screen.set_alpha(None)
 
 rayTracer = Raytracer(screen)
-rayTracer.rtClearColor(0.2, 0.2, 0.2)
+rayTracer.environmentMap = pygame.image.load("imagenes/desert2.jpg")
+rayTracer.rtClearColor(0.25, 0.25, 0.25)
 rayTracer.rtColor(1, 1, 1)
 
+# Piramide transparente
 rayTracer.scene.append(
-    Plane(position=(0, -2, 0), normal=(0, 1, -0.2), material=floor())
-)
-rayTracer.scene.append(
-    Plane(position=(0, 5, 0), normal=(0, 1, 0.2), material=ceiling())
-)
-rayTracer.scene.append(
-    Plane(position=(4, 0, 0), normal=(1, 0, 0.2), material=wall())
-)
-rayTracer.scene.append(
-    Plane(position=(-4, 0, 0), normal=(1, 0, -0.2), material=wall())
-)
-rayTracer.scene.append(
-    Plane(position=(0, 0, 5), normal=(0, 0, 1), material=wall())
+    Pyramid(position=(1.7, -0.9, -4), size=(1.5, 1.5, 1.5), material=glass())
 )
 
+# Piramide Reflectiva
 rayTracer.scene.append(
-    Disk(position=(0, 0, -7), normal=(0, 0, 1), radius=1, material=mirror())
+    Pyramid(position=(-0.1, -1.3, -4), size=(1.3, 1.3, 1.3), material=Marmol())
 )
 
+# Piramide Opaca
 rayTracer.scene.append(
-    AABB(position=(-1, 1, -5), size=(1, 1, 1), material=Velvet())
+    Pyramid(position=(-1.8, -1.7, -4), size=(1.3, 1.3, 1.3), material=Velvet())
 )
+
+# Piramide Reflectiva
 rayTracer.scene.append(
-    AABB(position=(-1, -1, -5), size=(1, 1, 1), material=Marmol())
-)
-rayTracer.scene.append(
-    AABB(position=(1, 1, -5), size=(1, 1, 1), material=Marmol())
-)
-rayTracer.scene.append(
-    AABB(position=(1, -1, -5), size=(1, 1, 1), material=Sky())
+    Pyramid(position=(-0.1, 0.9, -5), size=(1.8, 1.8, 1.8), material=Sky())
 )
 
 rayTracer.lights.append(
@@ -72,8 +59,8 @@ while isRunning:
             if event.key == pygame.K_ESCAPE:
                 isRunning = False
 
-rect = pygame. Rect(0, 0, width, height)
-sub = screen.subsurface(rect)
-pygame.image.save(sub, "Resultado.png")
+# rect = pygame. Rect(0, 0, width, height)
+# sub = screen.subsurface(rect)
+# pygame.image.save(sub, "Resultado.jpg")
 
 pygame.quit()
