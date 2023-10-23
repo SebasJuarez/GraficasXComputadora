@@ -63,6 +63,9 @@ def twoVecSubstraction(V1, V2): #Replace for: np.subtract(V1, V2)
     result = [x - y for x, y in zip(V1, V2)]
     return result
 
+def vecAdd(vec1, vec2):
+    return [x + y for x, y in zip(vec1, vec2)]
+
 def vecNorm(V): #Replace for: V / np.linalg.norm(V)
     norm = sqrt(sum([x * x for x in V]))
     result = [x / norm for x in V]
@@ -129,6 +132,10 @@ def twoVecMultiply(V1, V2): #Replace for: np.multiply(V1, V2)
 
 def valVecMultiply(val, V): #Replace for: np.multiply(val, V2)
     result = [x * val for x in V]
+    return result
+
+def valVecMultiply2(val, V): 
+    result = [x * V for x in val]
     return result
 
 def calculateMean(V):
