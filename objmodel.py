@@ -1,4 +1,4 @@
-class objmodel(object):
+class Obj(object):
     def __init__(self, filename):
         with open(filename,"r") as file:
             self.lines = file.read().splitlines()
@@ -14,11 +14,11 @@ class objmodel(object):
             except:
                 continue
         
-            if prefix =="v": #Vertices
+            if prefix =="v":
                self.vertices.append(list(map(float, list(filter(None,value.split(" "))))))
-            elif prefix =="vt": #Texture coordinates
+            elif prefix =="vt": 
                self.texcoords.append(list(map(float, list(filter(None,value.split(" "))))))
-            elif prefix =="vn": #Normals
+            elif prefix =="vn":
                self.normals.append(list(map(float, list(filter(None,value.split(" "))))))
-            elif prefix == "f": #Faces
+            elif prefix == "f":
                 self.faces.append([list(map(int, list(filter(None,vert.split("/"))))) for vert in list(filter(None,value.split(" ")))])

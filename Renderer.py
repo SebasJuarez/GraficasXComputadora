@@ -2,7 +2,6 @@ import glm
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram, compileShader
 
-
 class Renderer(object):
     def __init__(self, screen):
         self.screen = screen
@@ -10,44 +9,29 @@ class Renderer(object):
         self.clearColor = [0.0, 0.0, 0.0, 1.0]
         _, _, self.width, self.height = screen.get_rect()
         self.activeShader = None
-        # View Matrix
         self.cameraPosition = glm.vec3(0.0, 0.0, 0.0)
         self.cameraRotation = glm.vec3(0.0, 0.0, 0.0)
-        self.viewMatrix = self.getViewMatrix()
-        # Projection Matrix
-        self.projectionMatrix = glm.perspective(
-            glm.radians(60.0),  # FOV
-            self.width / self.height,  # Aspect Ratio
-            0.1,  # Near Plane
-            1000.0  # Far Plane
-        )
-        self.filledMode = True
-        self.elapsedTime = 0.0
         self.target = glm.vec3(0.0, 0.0, 0.0)
-        self.fatness = 0.0
-        self.directionalLight = glm.vec3(0.0, -1.0, 0.0)
+        self.projectionMatrix = glm.perspective(
+            glm.radians(60.0),  #FOV
+            self.width / self.height, 
+            0.1, 
+            1000.0  
+        )
+        self.elapsedTime = 0.0
+
+        self.dirLight = glm.vec3(1, 0, 0)
+        self.lightIntensity = 1.0
 
         glEnable(GL_DEPTH_TEST)
-        glEnable(GL_CULL_FACE)
         glViewport(0, 0, self.width, self.height)
 
     def updateViewMatrix(self):
-        self.viewMatrix = self.getViewMatrix()
-        # self.viewMatrix = glm.lookAt(
-        #     self.cameraPosition,
-        #     self.target,
-        #     glm.vec3(0.0, 1.0, 0.0)
-        # )
-
-    def toggleFilledMode(self):
-        self.filledMode = not self.filledMode
-
-        if self.filledMode:
-            glEnable(GL_CULL_FACE)
-            glPolygonMode(GL_FRONT, GL_FILL)
-        else:
-            # glDisable(GL_CULL_FACE)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+        self.viewMatrix = glm.lookAt(
+            self.cameraPosition,
+            self.target,
+            glm.vec3(0.0, 1.0, 0.0)
+        )
 
     def getViewMatrix(self):
         identity = glm.mat4(1.0)
@@ -74,7 +58,7 @@ class Renderer(object):
 
         if self.activeShader is not None:
             glUseProgram(self.activeShader)
-            # Set uniforms
+            #Set uniforms
             glUniformMatrix4fv(
                 glGetUniformLocation(self.activeShader, "viewMatrix"),
                 1,
@@ -91,14 +75,14 @@ class Renderer(object):
                 glGetUniformLocation(self.activeShader, "time"),
                 self.elapsedTime
             )
-            glUniform1f(
-                glGetUniformLocation(self.activeShader, "fatness"),
-                self.fatness
-            )
             glUniform3fv(
-                glGetUniformLocation(self.activeShader, "directionalLight"),
+                glGetUniformLocation(self.activeShader, "dirLight"),
                 1,
-                glm.value_ptr(self.directionalLight)
+                glm.value_ptr(self.dirLight)
+            )
+            glUniform1f(
+                glGetUniformLocation(self.activeShader, "lightIntensity"),
+                self.lightIntensity
             )
 
         for obj in self.scene:
