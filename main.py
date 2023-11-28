@@ -40,7 +40,7 @@ def printMenu():
     print("4. Unos hongos (presiona 4)")
     print("Los shaders estan en las teclas G, H, J, K, L")
     print("Te puedes mover usando las teclas de las flechas")
-    print("Puedes hacer zoom con la rueda del mouse")
+    print("\tPuedes hacer zoom con la rueda del mouse")
 
 def loadModel(objF):
     objDataF = []
@@ -103,6 +103,10 @@ angle = 0
 printMenu()
 while isRunning:
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+    # Enable polygon offset
+    glEnable(GL_POLYGON_OFFSET_FILL)
+    glPolygonOffset(1.0, 1.0)
 
     deltaTime = clock.tick(60) / 1000.0
     renderer.elapsedTime += deltaTime
@@ -248,6 +252,8 @@ while isRunning:
 
     renderer.updateViewMatrix()
     renderer.render()
+    # Disable polygon offset
+    glDisable(GL_POLYGON_OFFSET_FILL)
     pygame.display.flip()
 
 pygame.quit()
